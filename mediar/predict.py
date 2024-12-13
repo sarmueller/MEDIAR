@@ -2,7 +2,7 @@ import torch
 import argparse, pprint
 
 from train_tools import *
-from SetupDict import MODELS, PREDICTOR
+from mediar.SetupDict import MODELS, PREDICTOR
 
 # Set torch base print precision
 torch.set_printoptions(6)

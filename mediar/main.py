@@ -4,7 +4,7 @@ import wandb
 import argparse, pprint
 
 from train_tools import *
-from SetupDict import TRAINER, OPTIMIZER, SCHEDULER, MODELS, PREDICTOR
+from mediar.SetupDict import TRAINER, OPTIMIZER, SCHEDULER, MODELS, PREDICTOR
 
 # Ignore warnings for tiffle image reading
 import logging

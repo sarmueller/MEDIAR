@@ -5,8 +5,8 @@ from monai.inferers import sliding_window_inference
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../../")))
 
-from core.BasePredictor import BasePredictor
-from core.MEDIAR.utils import compute_masks
+from mediar.core.BasePredictor import BasePredictor
+from mediar.core.MEDIAR.utils import compute_masks
 
 __all__ = ["Predictor"]
 

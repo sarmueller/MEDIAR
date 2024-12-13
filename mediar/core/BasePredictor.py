@@ -7,7 +7,7 @@ from datetime import datetime
 from zipfile import ZipFile
 from pytz import timezone
 
-from train_tools.data_utils.transforms import get_pred_transforms
+from mediar.train_tools.data_utils.transforms import get_pred_transforms
 
 
 class BasePredictor:

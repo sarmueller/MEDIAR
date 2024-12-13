@@ -7,8 +7,8 @@ from monai.inferers import sliding_window_inference
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../../")))
 
-from core.BaseTrainer import BaseTrainer
-from core.MEDIAR.utils import *
+from mediar.core.BaseTrainer import BaseTrainer
+from mediar.core.MEDIAR.utils import *
 
 __all__ = ["Trainer"]
 

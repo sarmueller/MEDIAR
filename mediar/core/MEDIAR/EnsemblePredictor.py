@@ -4,7 +4,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../../")))
 
-from core.MEDIAR.Predictor import Predictor
+from mediar.core.MEDIAR.Predictor import Predictor
 
 __all__ = ["EnsemblePredictor"]
 
