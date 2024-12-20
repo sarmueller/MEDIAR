@@ -37,4 +37,4 @@ def print_with_logging(results, step):
     print()
 
     # Log on the w&b server
-    wandb.log(results, step=step)
+    #wandb.log(results, step=step)
