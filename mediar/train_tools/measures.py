@@ -142,7 +142,7 @@ def _get_true_positive(iou, threshold=0.5):
     num_matched = min(iou.shape[0], iou.shape[1])
 
     # Find optimal matching by using IoU as tie-breaker
-    costs = -(iou >= threshold).astype(np.float) - iou / (2 * num_matched)
+    costs = -(iou >= threshold).astype(np.float32) - iou / (2 * num_matched)
     matched_gt_label, matched_pred_label = linear_sum_assignment(costs)
 
     # Consider as the same instance only if the IoU is above the threshold
