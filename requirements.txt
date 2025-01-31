@@ -1,10 +1,10 @@
 fastremap==1.14.1
 monai==1.4.0
 numba==0.60.0
-pandas==2.0.3
-scipy==1.12.0
+#pandas==2.0.3
+#scipy==1.12.0
 segmentation_models_pytorch==0.3.3
-tqdm==4.65.0
-wandb==0.16.2
+#tqdm==4.65.0
+#wandb==0.16.2
 scikit-image
-matplotlib
+#matplotlib
