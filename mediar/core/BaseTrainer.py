@@ -49,6 +49,10 @@ class BaseTrainer:
         self.best_weights = None
         self.best_f1_score = 0.1
 
+        # Manual logging
+        self.train_logging = {}
+        self.val_logging = {}
+
         # FP-16 Scaler
         self.scaler = torch.cuda.amp.GradScaler() if amp else None
 
@@ -81,6 +85,15 @@ class BaseTrainer:
             train_results = self._epoch_phase("train")
             print_with_logging(train_results, epoch)
 
+            # Init logging dict
+            if epoch == 1:  
+                for key in train_results.keys():
+                    self.train_logging[key] = {}
+            # Manual logging
+            for key, value in train_results.items():
+                self.train_logging[key][epoch] = value
+            self.train_logging[epoch] = train_results
+
             if self.scheduler is not None:
                 self.scheduler.step()
 
@@ -89,7 +102,15 @@ class BaseTrainer:
                     # Valid Epoch Phase
                     print(">>> Valid Epoch")
                     valid_results = self._epoch_phase("valid")
-                    print_with_logging(valid_results, epoch)
+                    #print_with_logging(valid_results, epoch)
+
+                    # Init logging dict
+                    if epoch == self.valid_frequency:
+                        for key in valid_results.keys():
+                            self.val_logging[key] = {}
+                    # Manual logging
+                    for key, value in valid_results.items():
+                        self.val_logging[key][epoch] = value
 
                     if "Valid_F1_Score" in valid_results.keys():
                         current_f1_score = valid_results["Valid_F1_Score"]
@@ -194,7 +215,7 @@ class BaseTrainer:
         metric_key = "_".join([phase, metric_key]).title()
 
         # Aggregate metrics
-        metric_item = round(metric.aggregate().item(), 4)
+        metric_item = metric.aggregate()
 
         # Log metrics to dictionary
         phase_results[metric_key] = metric_item

@@ -4,11 +4,12 @@ Adapted from the following references:
 [2] https://github.com/stardist/stardist/blob/master/stardist/matching.py
 
 """
-
+from typing import Optional
 import numpy as np
 from skimage import segmentation
 from scipy.optimize import linear_sum_assignment
 from numba import jit
+from cellpose.metrics import average_precision
 
 __all__ = ["evaluate_f1_score_cellseg", "evaluate_f1_score"]
 
@@ -198,3 +199,41 @@ def _label_overlap(x, y):
         overlap[x[i], y[i]] += 1
 
     return overlap
+
+def scores_per_threshold(masks_true, masks_pred, thresholds: Optional[np.array] = None):
+    """
+    Computes F1, Average precision, recall and precision scores at given IoU threshold
+    based on `cellpose.metrics.average_precision` 
+    
+    masks_true, masks_pred: Lists of masks. Masks are 2D np.arrays of type `int`. 
+                            0 for background pixel, >0 for instance pixels
+                            
+    thresholds: np.array of IoU thresholds between 0 and 1. ROIs with IoU < threshold will
+                 not be matched.
+                 
+    Outputs:   
+    
+    f1, avg_precision, recall, precision: (n_masks x n_thresholds) arrays with one score per 
+                                          threshold
+    thresholds: (n_thresholds) array with the used IoU thresholds
+    (tp,fp,fn): (n_masks x n_thresholds) arrays holding the True Positives, False Positives and
+                False Negatives for each mask at each threshold.
+    """
+    if thresholds is None:
+        # floating point arithmetic makes errors, so specify these values by hand
+        thresholds = np.array([0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.70,
+                               0.75, 0.8, 0.85, 0.9, 0.95])
+
+    masks_true_list = [m for m in masks_true]
+    masks_pred_list = [m for m in masks_pred]
+
+    avg_precision, tp, fp, fn = average_precision(masks_true_list, masks_pred_list, threshold=thresholds)
+    # Avoid division by zero
+    prec_denom = np.maximum((tp + fp), 1.0)
+    precision = tp / prec_denom
+    recall_denom = np.maximum((tp + fn), 1.0)
+    recall = tp / recall_denom
+    f1_denom = np.maximum((2 * tp + fn + fp), 1.0)
+    f1 = 2 * tp / f1_denom
+
+    return f1, avg_precision, recall, precision, thresholds, (tp, fp, fn)

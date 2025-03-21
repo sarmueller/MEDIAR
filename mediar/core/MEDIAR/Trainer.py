@@ -3,7 +3,9 @@ import torch.nn as nn
 import numpy as np
 import os, sys
 from tqdm import tqdm
+from monai.metrics import CumulativeAverage
 from monai.inferers import sliding_window_inference
+from mediar.train_tools.measures import scores_per_threshold
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../../")))
 
@@ -44,6 +46,12 @@ class Trainer(BaseTrainer):
 
         self.mse_loss = nn.MSELoss(reduction="mean")
         self.bce_loss = nn.BCEWithLogitsLoss(reduction="mean")
+
+        # Custom autorois metrics
+        self.f1_metric_autorois = CumulativeAverage()
+        self.avg_precision_autorois = CumulativeAverage()
+        self.recall_autorois = CumulativeAverage()
+        self.precision_autorois = CumulativeAverage()
 
     def mediar_criterion(self, outputs, labels_onehot_flows):
         """loss function between true labels and prediction outputs"""
@@ -112,6 +120,15 @@ class Trainer(BaseTrainer):
                         outputs, labels = self._post_process(outputs, labels)
                         f1_score = self._get_f1_metric(outputs, labels)
                         self.f1_metric.append(f1_score)
+                        
+                        f1, avg_precision, recall, precision, _, _ = scores_per_threshold(
+                            [labels],
+                            [outputs],
+                        )
+                        self.f1_metric_autorois.append(f1)
+                        self.avg_precision_autorois.append(avg_precision)
+                        self.recall_autorois.append(recall)
+                        self.precision_autorois.append(precision)
 
                 # Backward pass
                 if phase == "train":
@@ -134,7 +151,22 @@ class Trainer(BaseTrainer):
             phase_results = self._update_results(
                 phase_results, self.f1_metric, "f1_score", phase
             )
-
+            for metric, name in zip(
+                [
+                    self.f1_metric_autorois,
+                    self.avg_precision_autorois,
+                    self.recall_autorois,
+                    self.precision_autorois,
+                ],
+                [
+                    "f1_thresholds",
+                    "avg_precision_thresholds",
+                    "recall_thresholds",
+                    "precision_thresholds",
+                ]):
+                phase_results = self._update_results(
+                    phase_results, metric, name, phase
+                )
         return phase_results
 
     def _inference(self, images, phase="train"):
